@@ -1,7 +1,8 @@
 tiktoken
 chonkie
-"chonkie[viz]"
+chonkie[viz]
 faiss-cpu
 transformers
 torch
 sentence-transformers
+
