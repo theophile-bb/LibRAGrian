@@ -1,0 +1,7 @@
+tiktoken
+chonkie
+"chonkie[viz]"
+faiss-cpu
+transformers
+torch
+sentence-transformers
