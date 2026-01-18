@@ -1,7 +1,8 @@
 # LibRAGrian
 
+[![Dataset on HF](https://huggingface.co/datasets/huggingface/badges/resolve/main/dataset-on-hf-md.svg)](https://huggingface.co/datasets/stas/gutenberg-100)
 
-
+<img width="917" height="851" alt="libragrian" src="https://github.com/user-attachments/assets/7b783f16-a970-455c-a3e7-13529e4ff96b" />
 
 
 
@@ -31,7 +32,7 @@ $ pip install -r requirements.txt
 
 ## Getting the data
 
-The data used for this project are available on kaggle at this address : (https://huggingface.co/datasets/stas/gutenberg-100).
+The data used for this project are available on kaggle at this address : https://huggingface.co/datasets/stas/gutenberg-100.
 
 ---
 
