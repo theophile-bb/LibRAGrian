@@ -32,7 +32,7 @@ $ pip install -r requirements.txt
 
 ## Getting the data
 
-The data used for this project are available on kaggle at this address : https://huggingface.co/datasets/stas/gutenberg-100.
+The data used for this project are available on Hugging Face at this address : https://huggingface.co/datasets/stas/gutenberg-100.
 
 ---
 
