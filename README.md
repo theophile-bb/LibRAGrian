@@ -5,8 +5,10 @@
 LibRAGrian is a Python project showcasing a complete Retrieval-Augmented Generation (RAG) pipeline built from open-source components. It processes and chunks large text (books) before embedding, indexing them and retrieving them.
 The stack used revolves around :
 - Chonkie Chunker for chunking
-<img src="image/chonkie_logo_br_transparent_bg.png" alt="Chonkie" width="300" height="200">
+<img src="image/chonkie.png" alt="Chonkie" width="140" height="150">
+
 - bge-small-en-v1.5 model for embedding
+  
 - Qwen 2.5-3b for retrieval
 <img src="image/qwen.png" alt="Qwen" width="100" height="100">
 
