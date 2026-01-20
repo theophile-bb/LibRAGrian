@@ -6,6 +6,19 @@
 
 ---
 
+LibRAGrian/
+├── src/
+│   ├── __init__.py
+│   └── utils.py
+├── LibRAGrian.ipynb
+├── requirements.txt
+├── LibRAGrian.ipynb
+├── .gitattributes
+├── .gitignore
+└── README.md   
+
+---
+
 ## 📋 Prerequisites
 
 This project requires:
