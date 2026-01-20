@@ -2,11 +2,7 @@
 
 [![Dataset on HF](https://huggingface.co/datasets/huggingface/badges/resolve/main/dataset-on-hf-md.svg)](https://huggingface.co/datasets/stas/gutenberg-100)
 
-
-<img width="399" height="417" alt="LibRAGrian illustration" src="https://github.com/user-attachments/assets/eb196d7f-b2d3-4b22-ab3b-adb176b66399" />
-
-
-
+<p align="center"><img src="image/LibRAGrian_illustration.png" alt="LibRAGrian illustration" width="399" height="417" align="center"></p>
 
 ---
 
