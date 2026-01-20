@@ -2,10 +2,11 @@
 
 [![Dataset on HF](https://huggingface.co/datasets/huggingface/badges/resolve/main/dataset-on-hf-md.svg)](https://huggingface.co/datasets/stas/gutenberg-100)
 
-LibRAGrian is a Python project showcasing a complete Retrieval-Augmented Generation (RAG) pipeline built from open-source components. It processes and chunks large text (books) before embedding, indexing them and retrieving them.
+LibRAGrian is a personal Python project showcasing a complete Retrieval-Augmented Generation (RAG) pipeline built from open-source components. It processes and chunks large text (books) before embedding, indexing and retrieving them.
+
 The stack used revolves around :
 
-<img src="image/chonkie.png" alt="Chonkie" width="140" height="150"> <img src="image/qwen.png" alt="Qwen" width="100" height="100">
+<p align="center"><img src="image/chonkie.png" alt="Chonkie" width="140" height="150">   <img src="image/BAAI.png" alt="BAAI" width="130" height="130">   <img src="image/qwen.png" alt="Qwen" width="140" height="140"></p>
 
 
 - Chonkie Chunker for chunking
