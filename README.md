@@ -50,7 +50,7 @@ The main notebook LibRAGrian.ipynb walks through:
 
 ---
 
-## Example of Query / Answer
+## Examples of Query / Answer
 
 Query :
 > Can you tell me about all the Jules Verne books you have heard of ?
