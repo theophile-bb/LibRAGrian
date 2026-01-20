@@ -2,8 +2,8 @@
 
 [![Dataset on HF](https://huggingface.co/datasets/huggingface/badges/resolve/main/dataset-on-hf-md.svg)](https://huggingface.co/datasets/stas/gutenberg-100)
 
-<img width="917" height="851" alt="libragrian" src="https://github.com/user-attachments/assets/7b783f16-a970-455c-a3e7-13529e4ff96b" />
 
+<img width="399" height="417" alt="LibRAGrian illustration" src="https://github.com/user-attachments/assets/eb196d7f-b2d3-4b22-ab3b-adb176b66399" />
 
 
 
