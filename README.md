@@ -6,7 +6,17 @@ LibRAGrian is a personal Python project showcasing a complete Retrieval-Augmente
 
 The stack used revolves around :
 
-<p align="center"><img src="image/chonkie.png" alt="Chonkie" width="140" height="150">   <img src="image/BAAI.png" alt="BAAI" width="130" height="130">   <img src="image/qwen.png" alt="Qwen" width="140" height="140"></p>
+<p align="center">
+  <a href="https://github.com/chonkie-inc/chonkie/">
+    <img src="image/chonkie.png" alt="Chonkie" width="140" height="150">
+  </a>
+  <a href="https://huggingface.co/BAAI">
+    <img src="image/BAAI.png" alt="BAAI" width="130" height="130">
+  </a>
+  <a href="https://huggingface.co/Qwen">  
+    <img src="image/qwen.png" alt="Qwen" width="140" height="140">
+  </a>
+</p>
 
 
 - Chonkie Chunker for chunking
