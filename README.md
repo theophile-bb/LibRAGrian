@@ -25,8 +25,6 @@ The stack used revolves around :
   
 - [**Qwen 2.5-3b**](https://huggingface.co/Qwen) for retrieval
 
-<p align="center"><img src="image/LibRAGrian_illustration.png" alt="LibRAGrian illustration" width="399" height="417" align="center"></p>
-
 ---
 
 ## Project Structure
