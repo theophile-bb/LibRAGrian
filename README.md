@@ -19,11 +19,11 @@ The stack used revolves around :
 </p>
 
 
-- Chonkie Chunker for chunking
+- [**Chonkie Chunker**](https://github.com/chonkie-inc/chonkie/) for chunking
 
-- bge-small-en-v1.5 model for embedding
+- [**bge-small-en-v1.5**](https://huggingface.co/BAAI) model for embedding
   
-- Qwen 2.5-3b for retrieval
+- [**Qwen 2.5-3b**](https://huggingface.co/Qwen) for retrieval
 
 <p align="center"><img src="image/LibRAGrian_illustration.png" alt="LibRAGrian illustration" width="399" height="417" align="center"></p>
 
