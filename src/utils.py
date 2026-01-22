@@ -19,8 +19,6 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 import faiss
 
 
-#--------------------- Book cleaning ------------------------
-
 def strip_beginning(text, expression):
     if not isinstance(text, str):
         return text
@@ -50,7 +48,7 @@ def strip_until_title(text, title):
 
     return text
 
-def Clean_book(string, title):
+def clean_book(string, title):
 
   # Decode UTF-8 BOM
   if string is None:
@@ -85,26 +83,25 @@ def Clean_book(string, title):
 
   return text
 
-#--------------------- Book chunking ------------------------
 
-def Chunk_text(text, size = 512, overlap = 128):
+def chunk_text(text, size = 512, overlap = 128):
   encoding = tiktoken.get_encoding("gpt2")
 
   chunker = TokenChunker(
-      tokenizer=encoding,    # Pass the encoding object
-      chunk_size=size,        # Maximum tokens per chunk
-      chunk_overlap=overlap      # Overlap between chunks
+      tokenizer=encoding,   
+      chunk_size=size,        
+      chunk_overlap=overlap     
   )
   chunks = chunker.chunk(text)
   return chunks
 
-def Recursive_chunk_text(text, size = 512, overlap = 128):
+def recursive_chunk_text(text, size = 512, overlap = 128):
   encoding = tiktoken.get_encoding("gpt2")
 
   chunker = RecursiveChunker(
-      tokenizer=encoding,    # Pass the encoding object
-      chunk_size=size,        # Maximum tokens per chunk
-      chunk_overlap=overlap,      # Overlap between chunks
+      tokenizer=encoding,    
+      chunk_size=size,        
+      chunk_overlap=overlap,     
       rules = RecursiveRules(),
       min_characters_per_chunk = 24
   )
@@ -112,7 +109,7 @@ def Recursive_chunk_text(text, size = 512, overlap = 128):
   return chunks
 
 
-def Create_chunk_df(book_df):
+def create_chunk_df(book_df):
   rows = []
 
   for i, row in book_df.iterrows():
@@ -129,9 +126,8 @@ def Create_chunk_df(book_df):
   chunks_df = pd.DataFrame(rows)
   return chunks_df
 
-#--------------------- Embedding ------------------------
 
-def Embedding(model_name, texts, batch_size = 32):
+def embed(model_name, texts, batch_size = 32):
   device = "cuda" if torch.cuda.is_available() else "cpu"
 
   print(f"Using device: {device}")
@@ -154,9 +150,8 @@ def Embedding(model_name, texts, batch_size = 32):
 
   return embeddings
 
-#--------------------- Create Faiss index ------------------------
 
-def Create_Faiss_index(embeddings):
+def create_Faiss_index(embeddings):
   embeddings = np.array(embeddings).astype("float32")
   faiss.normalize_L2(embeddings)
 
@@ -165,7 +160,6 @@ def Create_Faiss_index(embeddings):
   return index
 
 
-#--------------------- Models loading ------------------------
 
 def load_embedding_model(model_name, device=None):
     if device is None:
@@ -192,7 +186,6 @@ def load_generation_model(model_name="Qwen/Qwen2.5-3B-Instruct", device=None):
     model.eval()
     return tokenizer, model, device
 
-#--------------------- Retrieval from Faiss index ------------------------
 
 def retrieve(
     query,
@@ -220,7 +213,6 @@ def build_context(retrieved_rows):
 
     return "\n\n---\n\n".join(blocks)
 
-#--------------------- RAG pipeline ------------------------
 
 def answer_query(
     query,
@@ -233,7 +225,6 @@ def answer_query(
     k=8,
     max_new_tokens=200
 ):
-    # retrieve → build context → generate answer.
     
     retrieved_rows = retrieve(
         query=query,
@@ -279,4 +270,5 @@ Answer strictly based on the context:
     return {
         "answer": answer,
         "sources": retrieved_rows[["title", "chunk_id"]]
+
     }
