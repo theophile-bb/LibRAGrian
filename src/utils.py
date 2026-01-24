@@ -11,6 +11,7 @@ import tiktoken
 from chonkie import TokenChunker, RecursiveChunker, RecursiveRules
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForCausalLM, PreTrainedTokenizer, PreTrainedModel
+from langdetect import detect, detect_langs
 
 
 def strip_beginning(text: str, expression: str) -> str:
@@ -236,3 +237,4 @@ Answer strictly based on the context:
         "answer": answer,
         "sources": retrieved_rows[["title", "chunk_id"]]
     }
+
