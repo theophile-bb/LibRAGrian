@@ -1,25 +1,19 @@
-import pandas as pd
-import numpy as np
-
 import re
 import unicodedata
 import ast
-from langdetect import detect, detect_langs
+from typing import List, Optional, Union, Dict, Any, Tuple
 
-import tiktoken
-from chonkie import TokenChunker
-from chonkie import RecursiveChunker, RecursiveRules
-from chonkie import Visualizer
-
-import transformers
+import pandas as pd
+import numpy as np
 import torch
-from sentence_transformers import SentenceTransformer
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-
 import faiss
+import tiktoken
+from chonkie import TokenChunker, RecursiveChunker, RecursiveRules
+from sentence_transformers import SentenceTransformer
+from transformers import AutoTokenizer, AutoModelForCausalLM, PreTrainedTokenizer, PreTrainedModel
 
 
-def strip_beginning(text, expression):
+def strip_beginning(text: str, expression: str) -> str:
     if not isinstance(text, str):
         return text
     return re.sub(
@@ -29,202 +23,174 @@ def strip_beginning(text, expression):
         flags=re.IGNORECASE | re.DOTALL
     )
 
-def strip_until_title(text, title):
+def strip_until_title(text: str, title: str) -> str:
     if not text or not title:
         return text
 
     title = title.strip()
-
-    #whitespace-tolerant regex
     words = re.findall(r"\w+", title)
     if not words:
         return text
 
     title_pattern = r"\s+".join(map(re.escape, words))
-
     match = re.search(title_pattern, text, re.IGNORECASE)
     if match:
         return text[match.start():]
 
     return text
 
-def clean_book(string, title):
-
-  # Decode UTF-8 BOM
-  if string is None:
+def clean_book(string: Optional[Union[str, bytes]], title: str) -> Optional[str]:
+    if string is None:
         return None
 
-  if isinstance(string, str):
-      if string.startswith("b'") or string.startswith('b"'):
-        string = ast.literal_eval(string)
-      else:
-        text = string
-  if isinstance(string, bytes):
-      text = string.decode("utf-8-sig")
+    text: str = ""
+    if isinstance(string, str):
+        if string.startswith("b'") or string.startswith('b"'):
+            # Convert string representation of bytes back to actual string
+            text = ast.literal_eval(string).decode("utf-8-sig") if isinstance(ast.literal_eval(string), bytes) else ast.literal_eval(string)
+        else:
+            text = string
+    elif isinstance(string, bytes):
+        text = string.decode("utf-8-sig")
 
-  # Keep the content between the tags
-  start = re.search(r"\*\*\*\s*START OF THE PROJECT GUTENBERG EBOOK.*?\*\*\*", text, re.I | re.S)
-  end   = re.search(r"\*\*\*\s*END OF THE PROJECT GUTENBERG EBOOK.*?\*\*\*", text, re.I | re.S)
+    start = re.search(r"\*\*\*\s*START OF THE PROJECT GUTENBERG EBOOK.*?\*\*\*", text, re.I | re.S)
+    end = re.search(r"\*\*\*\s*END OF THE PROJECT GUTENBERG EBOOK.*?\*\*\*", text, re.I | re.S)
 
-  if start and end and start.end() < end.start():
+    if start and end and start.end() < end.start():
         text = text[start.end():end.start()]
 
-  # Remove unncessary line jumps
-  text = unicodedata.normalize("NFKC", text)
-  text = text.replace("\r\n", "\n")
-  text = re.sub(r"\n{3,}", "\n\n", text)
-  text = text.strip()
+    text = unicodedata.normalize("NFKC", text)
+    text = text.replace("\r\n", "\n")
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = text.strip()
 
-  # Strip redundant noise
-  text = strip_until_title(text, title)
-  text = strip_beginning(text, r'^Produced by.*?\n\s*\n')
-  text = strip_beginning(text, r'^\[Illustration\]\s*\n\s*\n')
-  text = text.strip()
-
-  return text
+    text = strip_until_title(text, title)
+    text = strip_beginning(text, r'^Produced by.*?\n\s*\n')
+    text = strip_beginning(text, r'^\[Illustration\]\s*\n\s*\n')
+    
+    return text.strip()
 
 
-def chunk_text(text, size = 512, overlap = 128):
-  encoding = tiktoken.get_encoding("gpt2")
+def chunk_text(text: str, size: int = 512, overlap: int = 128) -> List[Any]:
+    encoding = tiktoken.get_encoding("gpt2")
+    chunker = TokenChunker(
+        tokenizer=encoding,   
+        chunk_size=size,         
+        chunk_overlap=overlap      
+    )
+    return chunker.chunk(text)
 
-  chunker = TokenChunker(
-      tokenizer=encoding,   
-      chunk_size=size,        
-      chunk_overlap=overlap     
-  )
-  chunks = chunker.chunk(text)
-  return chunks
+def recursive_chunk_text(text: str, size: int = 512, overlap: int = 128) -> List[Any]:
+    encoding = tiktoken.get_encoding("gpt2")
+    chunker = RecursiveChunker(
+        tokenizer=encoding,    
+        chunk_size=size,         
+        chunk_overlap=overlap,      
+        rules=RecursiveRules(),
+        min_characters_per_chunk=24
+    )
+    return chunker.chunk(text)
 
-def recursive_chunk_text(text, size = 512, overlap = 128):
-  encoding = tiktoken.get_encoding("gpt2")
-
-  chunker = RecursiveChunker(
-      tokenizer=encoding,    
-      chunk_size=size,        
-      chunk_overlap=overlap,     
-      rules = RecursiveRules(),
-      min_characters_per_chunk = 24
-  )
-  chunks = chunker.chunk(text)
-  return chunks
-
-
-def create_chunk_df(book_df):
-  rows = []
-
-  for i, row in book_df.iterrows():
-    chunks = Chunk_text(row['cleaned_text'])
-
-    for j, chunk in enumerate(chunks):
-          rows.append({
-              "book_id": i,
-              "title": row["title"],
-              "chunk_id": j,
-              "chunk": chunk.text,
-              "token_count": chunk.token_count
-          })
-  chunks_df = pd.DataFrame(rows)
-  return chunks_df
-
-
-def embed(model_name, texts, batch_size = 32):
-  device = "cuda" if torch.cuda.is_available() else "cpu"
-
-  print(f"Using device: {device}")
-
-  model = SentenceTransformer(model_name, device=device)
-
-  model.eval()
-
-  embeddings = []
-  for i in range(0, len(texts), batch_size):
-      batch = texts[i:i+batch_size]
-
-      if not batch:
-          continue
-
-      batch_embeddings = model.encode(batch, convert_to_tensor=True, show_progress_bar=False)
-      embeddings.extend(batch_embeddings.tolist())
-
-  print(f"Generated {len(embeddings)} embeddings with dimension {len(embeddings[0]) if embeddings else 0}.")
-
-  return embeddings
-
-
-def create_faiss_index(embeddings):
-  embeddings = np.array(embeddings).astype("float32")
-  faiss.normalize_L2(embeddings)
-
-  index = faiss.IndexFlatIP(embeddings.shape[1])
-  index.add(embeddings)
-  return index
+def create_chunk_df(book_df: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    for i, row in book_df.iterrows():
+        chunks = chunk_text(row['cleaned_text'])
+        for j, chunk in enumerate(chunks):
+            rows.append({
+                "book_id": i,
+                "title": row["title"],
+                "chunk_id": j,
+                "chunk": chunk.text,
+                "token_count": chunk.token_count
+            })
+    return pd.DataFrame(rows)
 
 
 
-def load_embedding_model(model_name, device=None):
+def embed(model_name: str, texts: List[str], batch_size: int = 32) -> List[List[float]]:
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Using device: {device}")
+
+    model = SentenceTransformer(model_name, device=device)
+    model.eval()
+
+    embeddings = []
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i:i+batch_size]
+        if not batch:
+            continue
+        batch_embeddings = model.encode(batch, convert_to_tensor=False, show_progress_bar=False)
+        embeddings.extend(batch_embeddings.tolist())
+
+    print(f"Generated {len(embeddings)} embeddings.")
+    return embeddings
+
+def create_faiss_index(embeddings: Union[np.ndarray, List[List[float]]]) -> faiss.IndexFlatIP:
+    data = np.array(embeddings).astype("float32")
+    faiss.normalize_L2(data)
+    
+    index = faiss.IndexFlatIP(data.shape[1])
+    index.add(data)
+    return index
+
+
+
+def load_embedding_model(model_name: str, device: Optional[str] = None) -> SentenceTransformer:
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
+    return SentenceTransformer(model_name, device=device)
 
-    model = SentenceTransformer(
-        model_name,
-        device=device
-    )
-    return model
-
-def load_generation_model(model_name="Qwen/Qwen2.5-3B-Instruct", device=None):
+def load_generation_model(
+    model_name: str = "Qwen/Qwen2.5-3B-Instruct", 
+    device: Optional[str] = None
+) -> Tuple[PreTrainedTokenizer, PreTrainedModel, str]:
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
-        device_map="auto"
+        device_map="auto" if device == "cuda" else None
     )
-
+    if device != "cuda":
+        model.to(device)
+        
     model.eval()
     return tokenizer, model, device
 
-
 def retrieve(
-    query,
-    embed_model,
-    index,
-    chunks_df,
-    k=8
-):
-
+    query: str,
+    embed_model: SentenceTransformer,
+    index: faiss.Index,
+    chunks_df: pd.DataFrame,
+    k: int = 8
+) -> pd.DataFrame:
     q_emb = embed_model.encode(query, normalize_embeddings=True)
     q_emb = np.asarray([q_emb], dtype="float32")
 
     _, I = index.search(q_emb, k)
-
     return chunks_df.iloc[I[0]].reset_index(drop=True)
 
-
-def build_context(retrieved_rows):
+def build_context(retrieved_rows: pd.DataFrame) -> str:
     blocks = []
-
     for _, row in retrieved_rows.iterrows():
         blocks.append(
             f"[Source: {row['title']} | Chunk {row['chunk_id']}]\n{row['chunk']}"
         )
-
     return "\n\n---\n\n".join(blocks)
 
-
 def answer_query(
-    query,
-    embed_model,
-    index,
-    chunks_df,
-    gen_model,
-    gen_tokenizer,
-    device,
-    k=8,
-    max_new_tokens=200
-):
+    query: str,
+    embed_model: SentenceTransformer,
+    index: faiss.Index,
+    chunks_df: pd.DataFrame,
+    gen_model: PreTrainedModel,
+    gen_tokenizer: PreTrainedTokenizer,
+    device: str,
+    k: int = 8,
+    max_new_tokens: int = 200
+) -> Dict[str, Any]:
     
     retrieved_rows = retrieve(
         query=query,
@@ -264,12 +230,9 @@ Answer strictly based on the context:
         )
 
     output_text = gen_tokenizer.decode(outputs[0], skip_special_tokens=True)
-
     answer = output_text[len(prompt):].strip()
 
     return {
         "answer": answer,
         "sources": retrieved_rows[["title", "chunk_id"]]
-
     }
-
