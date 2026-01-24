@@ -151,7 +151,7 @@ def embed(model_name, texts, batch_size = 32):
   return embeddings
 
 
-def create_Faiss_index(embeddings):
+def create_faiss_index(embeddings):
   embeddings = np.array(embeddings).astype("float32")
   faiss.normalize_L2(embeddings)
 
@@ -272,3 +272,4 @@ Answer strictly based on the context:
         "sources": retrieved_rows[["title", "chunk_id"]]
 
     }
+
