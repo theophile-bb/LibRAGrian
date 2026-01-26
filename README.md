@@ -1,6 +1,8 @@
 # LibRAGrian
 
 [![Dataset on HF](https://huggingface.co/datasets/huggingface/badges/resolve/main/dataset-on-hf-md.svg)](https://huggingface.co/datasets/stas/gutenberg-100)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/theophile-bb/libRAGrian/blob/main/libRAGrian.ipynb)
+
 
 LibRAGrian is a personal Python project showcasing a complete Retrieval-Augmented Generation (RAG) pipeline built from open-source components. It processes and chunks large text (books) before embedding, indexing and retrieving them.
 
