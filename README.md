@@ -30,15 +30,17 @@ The stack used revolves around :
 ## Project Structure
 
 LibRAGrian/ <br>
-├── src/ <br>
-│   ├── __init__.py <br>
-│   └── utils.py <br>
-├── LibRAGrian.ipynb <br>
-├── requirements.txt <br>
-├── LibRAGrian.ipynb <br>
-├── .gitattributes <br>
-├── .gitignore <br>
-└── README.md <br>
+│ <br>
+├── 📁 src/ <br>
+│   ├── __init__.py      <br>
+│   └── utils.py         <br>
+│ <br>
+├── 📓 LibRAGrian.ipynb  <br>
+│ <br>
+├── 📄 requirements.txt  <br>
+├── 📄 .gitattributes    <br>
+├── 📄 .gitignore       <br>
+└── 📝 README.md        <br>
 
 ---
 
