@@ -1,3 +1,4 @@
+pandas
 tiktoken
 chonkie
 chonkie[viz]
@@ -6,4 +7,5 @@ transformers
 torch
 sentence-transformers
 langdetect
+
 
