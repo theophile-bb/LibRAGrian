@@ -1,0 +1,11 @@
+[project]
+name = "libragrian"
+version = "0.1.0"
+description = "A small library for RAG utilities"
+readme = "README.md"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
